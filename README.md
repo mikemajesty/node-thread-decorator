@@ -18,7 +18,7 @@
 ```ts
 import { RunInNewThread } from "node-thread-decorator";
 ```
-
+- Usage
 ```ts
 import { Controller, Get } from '@nestjs/common';
 
