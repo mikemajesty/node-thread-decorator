@@ -8,7 +8,7 @@
 ### Install
 
 ```
-$ npm i -S node-thread-decorator
+ npm i -S node-thread-decorator
 ```
 
 ### Usage
