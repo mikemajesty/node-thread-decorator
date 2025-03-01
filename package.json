@@ -1,0 +1,20 @@
+{
+  "name": "node-thread-decorator",
+  "version": "1.0.3",
+  "description": "node thread decorator",
+  "main": "dist/thread.decorator.js",
+  "types": "dist/thread.decorator.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "colorette": "^2.0.20",
+    "typescript": "^5.7.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.13.7"
+  }
+}
