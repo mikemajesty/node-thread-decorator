@@ -56,6 +56,7 @@ export class HealthController {
     return "APP UP!"
   }
 }
+```
 
 ---
 
