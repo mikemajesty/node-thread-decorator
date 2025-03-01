@@ -39,7 +39,6 @@ export class HealthController {
     while (Date.now() - start < milliseconds) {
       // Looping until time has passed
     }
-    console.log("Finished new process", process.pid);
   }
 
   /**
@@ -50,7 +49,6 @@ export class HealthController {
    */
   @Get(['/health', '/'])
   async getHealth(): Promise<string> {
-    console.log("Started process", process.pid);
     this.blockMainThread(10000); // Simulating blocking the thread for 10 seconds
     console.log("Health check completed");
     return "APP UP!"
