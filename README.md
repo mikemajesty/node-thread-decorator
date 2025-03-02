@@ -23,13 +23,12 @@ import { RunInNewThread } from "node-thread-decorator";
 import { Controller, Get } from '@nestjs/common';
 
 import { RunInNewThread } from 'node-thread-decorator';
-import { IHealthAdapter } from './adapter';
 
 @Controller()
 export class HealthController {
   /**
    * Blocks the main thread for a specified duration in milliseconds.
-   * This function runs in a new process due to the decorator `@RunInNewProcess`.
+   * This function runs in a new process due to the decorator `@RunInNewThread`.
    *
    * @param {number} milliseconds - The time to block the thread in milliseconds.
    */
