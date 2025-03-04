@@ -8,7 +8,7 @@
 ### Install
 
 ```
-$ npm i -S node-thread-decorator
+ npm i -S node-thread-decorator
 ```
 
 ### Usage
@@ -18,18 +18,17 @@ $ npm i -S node-thread-decorator
 ```ts
 import { RunInNewThread } from "node-thread-decorator";
 ```
-
+- Usage
 ```ts
 import { Controller, Get } from '@nestjs/common';
 
 import { RunInNewThread } from 'node-thread-decorator';
-import { IHealthAdapter } from './adapter';
 
 @Controller()
 export class HealthController {
   /**
    * Blocks the main thread for a specified duration in milliseconds.
-   * This function runs in a new process due to the decorator `@RunInNewProcess`.
+   * This function runs in a new process due to the decorator `@RunInNewThread`.
    *
    * @param {number} milliseconds - The time to block the thread in milliseconds.
    */
@@ -39,7 +38,6 @@ export class HealthController {
     while (Date.now() - start < milliseconds) {
       // Looping until time has passed
     }
-    console.log("Finished new process", process.pid);
   }
 
   /**
@@ -50,12 +48,12 @@ export class HealthController {
    */
   @Get(['/health', '/'])
   async getHealth(): Promise<string> {
-    console.log("Started process", process.pid);
     this.blockMainThread(10000); // Simulating blocking the thread for 10 seconds
     console.log("Health check completed");
     return "APP UP!"
   }
 }
+```
 
 ---
 
