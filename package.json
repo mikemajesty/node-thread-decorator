@@ -1,6 +1,6 @@
 {
   "name": "node-thread-decorator",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "node thread decorator",
   "main": "dist/thread.decorator.js",
   "types": "dist/thread.decorator.d.ts",
