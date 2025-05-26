@@ -27,7 +27,7 @@ import { RunInNewThread } from 'node-thread-decorator';
 export class HealthController {
   /**
    * Blocks the main thread for a specified duration in milliseconds.
-   * This function runs in a new process due to the decorator `@RunInNewThread`.
+   * This function runs in a new thread due to the decorator `@RunInNewThread`.
    *
    * @param {number} milliseconds - The time to block the thread in milliseconds.
    */
