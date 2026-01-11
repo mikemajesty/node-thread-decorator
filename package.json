@@ -1,20 +1,63 @@
 {
   "name": "node-thread-decorator",
   "version": "1.0.4",
-  "description": "node thread decorator",
-  "main": "dist/thread.decorator.js",
-  "types": "dist/thread.decorator.d.ts",
-  "scripts": {
-    "build": "tsc"
+  "description": "A TypeScript decorator that executes class methods in separate Node.js worker threads",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "import": "./dist/index.js"
+    }
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prebuild": "rm -rf dist",
+    "test": "jest",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "typescript",
+    "decorator",
+    "thread",
+    "worker",
+    "worker-threads",
+    "nodejs",
+    "multithreading",
+    "async",
+    "parallel",
+    "cpu-intensive",
+    "nestjs"
+  ],
+  "author": "Mike Lima <mikemajesty>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mikemajesty/node-thread-decorator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mikemajesty/node-thread-decorator/issues"
+  },
+  "homepage": "https://github.com/mikemajesty/node-thread-decorator#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
-    "colorette": "^2.0.20",
-    "typescript": "^5.7.3"
+    "colorette": "^2.0.20"
   },
   "devDependencies": {
-    "@types/node": "^22.13.7"
+    "@types/jest": "^30.0.0",
+    "@types/node": "^22.13.7",
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
   }
 }

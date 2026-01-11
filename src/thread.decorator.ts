@@ -1,67 +1,99 @@
 import { red } from 'colorette';
 import { Worker } from 'worker_threads';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyFunction = (...args: any[]) => any;
+
+/**
+ * Decorator that executes the decorated method in a separate worker thread.
+ * 
+ * @param timeout - Optional maximum execution time in milliseconds.
+ * @returns A method decorator that wraps the method to run in a worker thread.
+ */
 export function RunInNewThread(timeout?: number) {
-  return function (target: object, key: string, descriptor: PropertyDescriptor): PropertyDescriptor {
-    const originalMethod = descriptor.value;
+  return function (
+    target: object,
+    propertyKey: string | symbol,
+    descriptor: PropertyDescriptor
+  ): PropertyDescriptor {
+    const originalMethod: AnyFunction = descriptor.value
 
-    // Modifying the descriptor to replace the original method with one that runs in a worker thread
-    descriptor.value = function (...args: unknown[]) {
-      // Convert the method code to string to send to the worker
-      const fnCode = originalMethod.toString();
+    descriptor.value = async function (...args: unknown[]): Promise<unknown> {
+      return new Promise((resolve, reject) => {
+        const fnCode = originalMethod.toString()
 
-      // Create a new Worker instance to run the method in a separate thread
-      const worker = new Worker(`${__dirname}/thread.js`);
+      const workerFile = __filename.endsWith('.ts') ? `${__dirname}/thread.ts` : `${__dirname}/thread.js`
 
-      let timeoutId: NodeJS.Timeout | null = null;
+        const worker = new Worker(workerFile, {
+          execArgv: __filename.endsWith('.ts') ? ['-r', 'ts-node/register'] : []
+        })
+        let timeoutId: NodeJS.Timeout | null = null
+        let isResolved = false
 
-      // Send the method code and arguments to the worker
-      worker.postMessage([fnCode, args]);
-
-      // Set a timeout if specified
-      if (timeout) {
-        timeoutId = setTimeout(() => {
-          const className = target.constructor.name;
-          const methodName = key;
-          const error = new Error('worker execution timed out.');
-          Object.assign(error, { context: `${className}/${methodName}` });
-
-          console.error(error);
-          worker.terminate(); // Terminate the worker if it times out
-        }, timeout);
-      }
-
-      // Handle messages received from the worker (either success or error)
-      worker.on('message', (value: { error: Error; success: unknown }) => {
-        if (timeoutId) clearTimeout(timeoutId); // Clear the timeout if the worker finishes early
-        if (value.error) {
-          return Promise.reject(value.error); // Reject if there's an error
+        const cleanup = () => {
+          if (timeoutId) {
+            clearTimeout(timeoutId)
+            timeoutId = null
+          }
+          worker.terminate()
         }
 
-        if (value.success) {
-          return Promise.resolve(value.success); // Resolve with the worker's result
+        const resolveOnce = (value: unknown) => {
+          if (!isResolved) {
+            isResolved = true
+            cleanup()
+            resolve(value)
+          }
         }
-      });
 
-      // Handle errors emitted by the worker thread
-      worker.on('error', (err: Error) => {
-        if (timeoutId) clearTimeout(timeoutId); // Clear timeout on error
-        if (err.name === 'ReferenceError') {
-          console.error(red('worker error '), err);
-          return;
+        const rejectOnce = (error: Error) => {
+          if (!isResolved) {
+            isResolved = true
+            cleanup()
+            reject(error)
+          }
         }
-        console.error(red('worker error '), err?.message ?? err);
-      });
 
-      // Handle worker exit (whether successful or with an error code)
-      worker.on('exit', (code: number) => {
-        if (timeoutId) clearTimeout(timeoutId); // Clear timeout on worker exit
-        if (code !== 0) {
-          console.error(red(`worker stopped with exit code ${code}`)); // Log if the worker exits with a non-zero code
+        worker.postMessage([fnCode, args])
+
+        if (timeout) {
+          timeoutId = setTimeout(() => {
+            const className = target.constructor.name
+            const methodName = String(propertyKey)
+            const error = new Error(`Worker execution timed out after ${timeout} ms`)
+            Object.assign(error, { context: `${className}/${methodName}` })
+            rejectOnce(error)
+          }, timeout)
         }
-      });
-    };
 
-    return descriptor;
-  };
+        worker.once('message', (value: { error?: Error; success?: unknown }) => {
+          if (value.error) {
+            const error = new Error(value.error.message)
+            error.stack = value.error.stack
+            error.name = value.error.name
+            rejectOnce(error)
+          } else {
+            resolveOnce(value.success)
+          }
+        })
+
+        worker.once('error', (err: Error) => {
+          if (err.name === 'ReferenceError') {
+            console.error(red('Worker reference error: '), err.message)
+            rejectOnce(new Error('Reference error in worker: ' + err.message))
+          } else {
+            rejectOnce(err)
+          }
+        })
+
+        worker.once('exit', (code: number) => {
+          if (code !== 0 && !isResolved) {
+            rejectOnce(new Error(`Worker stopped with exit code ${code}`))
+          }
+        })
+      })
+    }
+
+    return descriptor
+  }
 }
