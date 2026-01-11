@@ -1,6 +1,6 @@
 {
   "name": "node-thread-decorator",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A TypeScript decorator that executes class methods in separate Node.js worker threads",
   "main": "dist/index.js",
   "module": "dist/index.js",
